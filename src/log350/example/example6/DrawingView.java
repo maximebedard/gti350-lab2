@@ -179,10 +179,9 @@ public class DrawingView extends View {
 	static final int MODE_CAMERA_MANIPULATION = 1; // the user is panning/zooming the camera
 	static final int MODE_SHAPE_MANIPULATION = 2; // the user is translating/rotating/scaling a shape
 	static final int MODE_LASSO = 3; // the user is drawing a lasso to select shapes
-    static final int MODE_EFFACER = 4;
-    static final int MODE_ENCADRER = 5;
-    static final int MODE_CREER = 6;
 	int currentMode = MODE_NEUTRAL;
+    boolean highlightEffacer = false;
+    boolean highlightEncadrer = false;
 
 	// This is only used when currentMode==MODE_SHAPE_MANIPULATION, otherwise it is equal to -1
 	int indexOfShapeBeingManipulated = -1;
@@ -265,8 +264,8 @@ public class DrawingView extends View {
 
 
 		lassoButton.draw( gw, currentMode == MODE_LASSO );
-        effacerButton.draw(gw, false);
-        encadrerButton.draw(gw, false);
+        effacerButton.draw(gw, highlightEffacer);
+        encadrerButton.draw(gw, highlightEncadrer);
         creerButton.draw(gw, false);
 
 		if ( currentMode == MODE_LASSO ) {
@@ -355,17 +354,30 @@ public class DrawingView extends View {
 
 
 
-                    if (type == MotionEvent.ACTION_DOWN) {
-                        Point2D p_pixels = new Point2D(x,y);
-                        if ( effacerButton.contains(p_pixels) ) {
-                            Log.i("Suppression", String.format("Nombre de formes = %d", selectedShapes.size()));
+                    if (type == MotionEvent.ACTION_DOWN && effacerButton.contains(new Point2D(x,y))) {
+                        highlightEffacer = true;
+                        Log.i("Suppression", String.format("Nombre de formes = %d", selectedShapes.size()));
 
-                            for(Shape s: selectedShapes) {
-                                shapeContainer.removeShape(s);
-                            }
-                            selectedShapes.clear();
+                        for(Shape s: selectedShapes) {
+                            shapeContainer.removeShape(s);
                         }
+                        selectedShapes.clear();
+                    } else {
+                        highlightEffacer = false;
                     }
+
+
+                    if (type == MotionEvent.ACTION_DOWN && encadrerButton.contains(new Point2D(x,y))) {
+
+                        Log.i("Encadrer", "Encadrement de la scène");
+
+                        highlightEncadrer = true;
+                        gw.frame(shapeContainer.getBoundingRectangle(),true);
+
+                    } else {
+                        highlightEncadrer = false;
+                    }
+
 					
 					switch ( currentMode ) {
 					case MODE_NEUTRAL :
