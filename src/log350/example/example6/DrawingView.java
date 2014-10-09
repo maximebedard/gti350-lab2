@@ -178,12 +178,20 @@ public class DrawingView extends View {
 	static final int MODE_CAMERA_MANIPULATION = 1; // the user is panning/zooming the camera
 	static final int MODE_SHAPE_MANIPULATION = 2; // the user is translating/rotating/scaling a shape
 	static final int MODE_LASSO = 3; // the user is drawing a lasso to select shapes
+    static final int MODE_EFFACER = 4;
+    static final int MODE_ENCADRER = 5;
+    static final int MODE_CREER = 6;
 	int currentMode = MODE_NEUTRAL;
 
 	// This is only used when currentMode==MODE_SHAPE_MANIPULATION, otherwise it is equal to -1
 	int indexOfShapeBeingManipulated = -1;
 
 	MyButton lassoButton = new MyButton( "Lasso", 10, 70, 140, 140 );
+    MyButton effacerButton = new MyButton("Effacer",10, 220, 140, 140 );
+    MyButton encadrerButton = new MyButton("Encadrer",10, 370, 140, 140 );
+    MyButton creerButton = new MyButton("Créer",10, 520, 140, 140 );
+
+
 	
 	OnTouchListener touchListener;
 	
@@ -254,7 +262,11 @@ public class DrawingView extends View {
 
 		gw.setCoordinateSystemToPixels();
 
+
 		lassoButton.draw( gw, currentMode == MODE_LASSO );
+        effacerButton.draw(gw, currentMode == MODE_EFFACER);
+        encadrerButton.draw(gw, currentMode == MODE_ENCADRER);
+        creerButton.draw(gw, currentMode == MODE_CREER);
 
 		if ( currentMode == MODE_LASSO ) {
 			MyCursor lassoCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
