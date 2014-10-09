@@ -418,6 +418,25 @@ public class DrawingView extends View {
 						}
 						break;
 					case MODE_SHAPE_MANIPULATION :
+                        if( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_MOVE) {
+
+                            MyCursor cur = cursorContainer.getCursorByIndex(0);
+
+                            ArrayList<Point2D> points = new ArrayList<Point2D>();
+
+                            for (Shape s : selectedShapes) {
+                                for (Point2D p : s.getPoints())
+                                    points.add(p);
+
+                            }
+                            Point2DUtil.transformPointsBasedOnDisplacementOfOnePoint(
+                                    points,
+                                    gw.convertPixelsToWorldSpaceUnits(cur.getPreviousPosition()),
+                                    gw.convertPixelsToWorldSpaceUnits(cur.getCurrentPosition())
+                            );
+
+
+                        }
 						if ( cursorContainer.getNumCursors() == 2 && type == MotionEvent.ACTION_MOVE && indexOfShapeBeingManipulated>=0 ) {
 							MyCursor cursor0 = cursorContainer.getCursorByIndex( 0 );
 							MyCursor cursor1 = cursorContainer.getCursorByIndex( 1 );
