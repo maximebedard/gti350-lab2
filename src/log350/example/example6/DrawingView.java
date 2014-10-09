@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 //import android.graphics.Path;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -264,9 +265,9 @@ public class DrawingView extends View {
 
 
 		lassoButton.draw( gw, currentMode == MODE_LASSO );
-        effacerButton.draw(gw, currentMode == MODE_EFFACER);
-        encadrerButton.draw(gw, currentMode == MODE_ENCADRER);
-        creerButton.draw(gw, currentMode == MODE_CREER);
+        effacerButton.draw(gw, false);
+        encadrerButton.draw(gw, false);
+        creerButton.draw(gw, false);
 
 		if ( currentMode == MODE_LASSO ) {
 			MyCursor lassoCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
@@ -351,6 +352,20 @@ public class DrawingView extends View {
 							}
 						}
 					}
+
+
+
+                    if (type == MotionEvent.ACTION_DOWN) {
+                        Point2D p_pixels = new Point2D(x,y);
+                        if ( effacerButton.contains(p_pixels) ) {
+                            Log.i("Suppression", String.format("Nombre de formes = %d", selectedShapes.size()));
+
+                            for(Shape s: selectedShapes) {
+                                shapeContainer.removeShape(s);
+                            }
+                            selectedShapes.clear();
+                        }
+                    }
 					
 					switch ( currentMode ) {
 					case MODE_NEUTRAL :
