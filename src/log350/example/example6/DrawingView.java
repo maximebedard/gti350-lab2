@@ -107,6 +107,7 @@ class CursorContainer {
 		}
 		return -1;
 	}
+
 	public MyCursor getCursorById( int id ) {
 		int index = findIndexOfCursorById( id );
 		return ( index == -1 ) ? null : cursors.get( index );
@@ -179,6 +180,7 @@ public class DrawingView extends View {
 	static final int MODE_CAMERA_MANIPULATION = 1; // the user is panning/zooming the camera
 	static final int MODE_SHAPE_MANIPULATION = 2; // the user is translating/rotating/scaling a shape
 	static final int MODE_LASSO = 3; // the user is drawing a lasso to select shapes
+    static final int MODE_CREER = 4;
 	int currentMode = MODE_NEUTRAL;
     boolean highlightEffacer = false;
     boolean highlightEncadrer = false;
@@ -263,10 +265,10 @@ public class DrawingView extends View {
 		gw.setCoordinateSystemToPixels();
 
 
-		lassoButton.draw( gw, currentMode == MODE_LASSO );
+		lassoButton.draw(gw, currentMode == MODE_LASSO);
         effacerButton.draw(gw, highlightEffacer);
         encadrerButton.draw(gw, highlightEncadrer);
-        creerButton.draw(gw, false);
+        creerButton.draw(gw, currentMode == MODE_CREER);
 
 		if ( currentMode == MODE_LASSO ) {
 			MyCursor lassoCursor = cursorContainer.getCursorByType( MyCursor.TYPE_DRAGGING, 0 );
@@ -378,7 +380,8 @@ public class DrawingView extends View {
                         highlightEncadrer = false;
                     }
 
-					
+
+
 					switch ( currentMode ) {
 					case MODE_NEUTRAL :
 						if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_DOWN ) {
@@ -389,6 +392,11 @@ public class DrawingView extends View {
 								currentMode = MODE_LASSO;
 								cursor.setType( MyCursor.TYPE_BUTTON );
 							}
+                            else if(creerButton.contains(p_pixels)){
+                                currentMode = MODE_CREER;
+                                cursor.setType(MyCursor.TYPE_BUTTON);
+
+                            }
 							else if ( indexOfShapeBeingManipulated >= 0 ) {
 								currentMode = MODE_SHAPE_MANIPULATION;
 								cursor.setType( MyCursor.TYPE_DRAGGING );
@@ -492,6 +500,43 @@ public class DrawingView extends View {
 							}
 						}
 						break;
+                        case MODE_CREER:
+
+                            if(type == MotionEvent.ACTION_DOWN && cursorContainer.getNumCursors() >= 3) {
+
+
+                                if(indexOfShapeBeingManipulated != -1)
+                                    shapeContainer.removeShape(indexOfShapeBeingManipulated);
+
+                                ArrayList<Point2D> points = new ArrayList<Point2D>();
+                                for(int i = 0; i < cursorContainer.getNumCursors(); i++) {
+                                    Point2D cp = gw.convertPixelsToWorldSpaceUnits(cursorContainer.getCursorByIndex(i).getCurrentPosition());
+                                    points.add(cp);
+                                }
+
+                                Shape s = shapeContainer.addShape(Point2DUtil.computeConvexHull(points));
+                                indexOfShapeBeingManipulated = shapeContainer.getShapeIndex(s);
+
+
+                            }
+                            else if ( cursorContainer.getNumCursors() == 1 && type == MotionEvent.ACTION_DOWN ) {
+                                Point2D p_pixels = new Point2D(x,y);
+                                if ( lassoButton.contains(p_pixels) ) {
+                                    currentMode = MODE_LASSO;
+                                    cursor.setType( MyCursor.TYPE_BUTTON );
+                                }
+                                else if (creerButton.contains(p_pixels)) {
+                                    currentMode = MODE_NEUTRAL;
+                                    cursor.setType( MyCursor.TYPE_BUTTON );
+                                }
+                            }
+                            else if(type == MotionEvent.ACTION_UP) {
+                                cursorContainer.removeCursorByIndex( cursorIndex );
+                                indexOfShapeBeingManipulated = -1;
+
+                            }
+
+                            break;
 					}
 					
 					v.invalidate();
